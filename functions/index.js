@@ -6,9 +6,11 @@ const app = express();
 const admin = require("firebase-admin");
 admin.initializeApp();
 
+const collectionName = "requests";
+
 // GET query without parameters
 app.get("/", async (req, res) => {
-  const snapshot = await admin.firestore().collection("users").get();
+  const snapshot = await admin.firestore().collection(collectionName).get();
 
   const users = [];
   snapshot.forEach((doc) => {
@@ -23,7 +25,7 @@ app.get("/", async (req, res) => {
 
 // GET query with parameters
 app.get("/:id", async (req, res) => {
-  const collection = await admin.firestore().collection("users");
+  const collection = await admin.firestore().collection(collectionName);
   const snapshot = await collection.doc(req.params.id).get();
 
   const docId = snapshot.id;
@@ -36,7 +38,7 @@ app.get("/:id", async (req, res) => {
 app.post("/", async (req, res) => {
   const users = req.body;
 
-  await admin.firestore().collection("users").add(users);
+  await admin.firestore().collection(collectionName).add(users);
   res.status(201).send();
 });
 
@@ -44,7 +46,7 @@ app.post("/", async (req, res) => {
 app.put("/:id", async (req, res) => {
   const body = req.body;
 
-  const collection = await admin.firestore().collection("users");
+  const collection = await admin.firestore().collection(collectionName);
   await collection.doc(req.params.id).update({...body});
 
   res.status(200).send();
@@ -52,7 +54,7 @@ app.put("/:id", async (req, res) => {
 
 // DELETE query
 app.delete("/:id", async (req, res) => {
-  const collection = await admin.firestore().collection("users");
+  const collection = await admin.firestore().collection(collectionName);
   await collection.doc(req.params.id).delete();
 
   res.status(200).send();
