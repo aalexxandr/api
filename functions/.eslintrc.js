@@ -11,5 +11,6 @@ module.exports = {
   ],
   rules: {
     quotes: ["error", "double"],
+    "linebreak-style": 0
   },
 };
