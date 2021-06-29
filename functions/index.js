@@ -1,17 +1,29 @@
-// requests Rest API
+const domains = [
+  "http://localhost:3000",
+  "http://srv85564.ht-test.ru"
+];
+
+const corsParams = {
+  origin: domains
+}
+// creating the RestApi functions for - "requests" 
+
 const functions = require("firebase-functions");
 const express = require("express");
 const cors = require("cors")
-const app = express();
+
+const appRequests = express();
+appRequests.use(cors(corsParams))
 
 const admin = require("firebase-admin");
 admin.initializeApp();
-app.use(cors({origin: true}))
-const collectionName = "requests";
+
+const requestsCollectionName = "requests";
+const usersCollectionName = "users";
 
 // GET query without parameters
-app.get("/", async (req, res) => {
-  const snapshot = await admin.firestore().collection(collectionName).get();
+appRequests.get("/", async (req, res) => {
+  const snapshot = await admin.firestore().collection(requestsCollectionName).get();
 
   const users = [];
   snapshot.forEach((doc) => {
@@ -25,9 +37,8 @@ app.get("/", async (req, res) => {
 });
 
 // GET query with parameters
-
-// app.get("/:id", async (req, res) => {
-//   const collection = await admin.firestore().collection(collectionName);
+// appRequests.get("/:id", async (req, res) => {
+//   const collection = await admin.firestore().collection(requestsCollectionName);
 //   const snapshot = await collection.doc(req.params.id).get();
 
 //   const docId = snapshot.id;
@@ -37,76 +48,77 @@ app.get("/", async (req, res) => {
 // });
 
 // POST query
-app.post("/", async (req, res) => {
+appRequests.post("/", async (req, res) => {
   const users = req.body;
-  await admin.firestore().collection(collectionName).add(users);
+
+  await admin.firestore().collection(requestsCollectionName).add(users);
   res.status(201).send();
 });
 
 // PUT query
-app.put("/:id", async (req, res) => {
+appRequests.put("/:id", async (req, res) => {
   const body = req.body;
 
-  const collection = await admin.firestore().collection(collectionName);
+  const collection = await admin.firestore().collection(requestsCollectionName);
   await collection.doc(req.params.id).update({...body});
 
   res.status(200).send();
 });
 
 // DELETE query
-app.delete("/:id", async (req, res) => {
-  const collection = await admin.firestore().collection(collectionName);
+appRequests.delete("/:id", async (req, res) => {
+  const collection = await admin.firestore().collection(requestsCollectionName);
   await collection.doc(req.params.id).delete();
 
   res.status(200).send();
 });
 
-exports.requests = functions.https.onRequest(app);
 
-// //users Rest API
+// creating the RestApi functions for - "users"
 
-// const appUsers = express();
+const appUsers = express();
+appUsers.use(cors(corsParams))
 
-// // GET query without parameters
-// appUsers.get("/", async (req, res) => {
-//     const snapshot = await admin.firestore().collection(collectionName).get();
-  
-//     const users = [];
-//     snapshot.forEach((doc) => {
-//       const id = doc.id;
-//       const data = doc.data();
-  
-//       users.push({id, ...data});
-//     });
-  
-//     res.status(200).send(JSON.stringify(users));
-//   });
-  
-  // GET query with parameters
+// GET query without parameters
+appUsers.get("/", async (req, res) => {
+  const snapshot = await admin.firestore().collection(usersCollectionName).get();
 
-//   appUsers.get("/:id", async (req, res) => {
-//     const collection = await admin.firestore().collection(collectionName);
-//     const snapshot = await collection.doc(req.params.id).get();
-  
-//     const docId = snapshot.id;
-//     const docData = snapshot.data();
-  
-//     res.status(200).send(JSON.stringify({id: docId, ...docData}));
-//   });
-  
-  // POST query
-//   appUsers.post("/", async (req, res) => {
-//     const users = req.body;
-//     await admin.firestore().collection(collectionName).add(users);
-//     res.status(201).send();
-//   });
-  
-//   // DELETE query
-//   appUsers.delete("/:id", async (req, res) => {
-//     const collection = await admin.firestore().collection(collectionName);
-//     await collection.doc(req.params.id).delete();
-  
-//     res.status(200).send();
-//   });
-  
-// exports.users = functions.https.onRequest(appUsers);
+  const users = [];
+  snapshot.forEach((doc) => {
+    const id = doc.id;
+    const data = doc.data();
+
+    users.push({id, ...data});
+  });
+
+  res.status(200).send(JSON.stringify(users));
+});
+
+// POST query
+appUsers.post("/", async (req, res) => {
+  const users = req.body;
+
+  await admin.firestore().collection(usersCollectionName).add(users);
+  res.status(201).send();
+});
+
+// PUT query
+appUsers.put("/:id", async (req, res) => {
+  const body = req.body;
+
+  const collection = await admin.firestore().collection(usersCollectionName);
+  await collection.doc(req.params.id).update({...body});
+
+  res.status(200).send();
+});
+
+// DELETE query
+appUsers.delete("/:id", async (req, res) => {
+  const collection = await admin.firestore().collection(usersCollectionName);
+  await collection.doc(req.params.id).delete();
+
+  res.status(200).send();
+});
+
+exports.requests = functions.https.onRequest(appRequests);
+exports.users = functions.https.onRequest(appUsers);
